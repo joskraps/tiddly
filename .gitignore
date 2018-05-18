@@ -1,0 +1,10 @@
+*.nupkg
+Data.SDK.Sql.Tests.Performance/obj/
+Data.SDK.Sql.Tests.Performance/bin/
+Data.SDK.Sql.Tests/obj/
+Data.SDK.Sql.Tests/bin/
+Data.SDK.Sql/obj/
+Data.SDK.Sql/bin/
+packages/
+.vs/
+Data.SDK.Sql/nuget.exe
