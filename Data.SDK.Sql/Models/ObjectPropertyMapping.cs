@@ -1,8 +1,8 @@
-﻿using System;
-using System.Reflection;
-
-namespace Tiddly.Sql.Models
+﻿namespace Tiddly.Sql.Models
 {
+    using System;
+    using System.Reflection;
+
     public class ObjectPropertyMapping
     {
         public string Accessor { get; set; }

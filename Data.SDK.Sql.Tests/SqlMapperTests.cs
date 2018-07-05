@@ -156,6 +156,161 @@ namespace Tiddly.Sql.Tests
         }
 
         [TestMethod]
+        public void TestObjectKeyedCollectionBadPropertyName()
+        {
+            var dt = new DataTable();
+            dt.Columns.AddRange(new[]
+                                    {
+                                        new DataColumn("IntegerValue1", typeof(int)),
+                                        new DataColumn("StringValue1", typeof(string))
+                                    });
+
+            var i = 0;
+            while (i < 10)
+            {
+                var dr = dt.NewRow();
+                dr["IntegerValue1"] = i;
+                dr["StringValue1"] = "BOOM" + i;
+                dt.Rows.Add(dr);
+                i++;
+            }
+
+            var ee = new ExecutionContext()
+                         {
+                             CustomColumnMappings = new Dictionary<string, string>(),
+                             TableSchema = "dbo"
+                         };
+
+            var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
+
+            try
+            {
+                var testCollection2 =
+                    SqlMapper.KeyedMap<int, MappingTestObject>("IntegerValue1111", testCollection1, ee, false);
+                Assert.Fail("Should fail because the property name is not valid");
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e.Message == "Property to be used to key is not on the supplied object");
+            }
+        }
+
+        [TestMethod]
+        public void TestObjectKeyedCollectionBadTypeMapping()
+        {
+            var dt = new DataTable();
+            dt.Columns.AddRange(new[]
+                                    {
+                                        new DataColumn("IntegerValue1", typeof(int)),
+                                        new DataColumn("StringValue1", typeof(string))
+                                    });
+
+            var i = 0;
+            while (i < 10)
+            {
+                var dr = dt.NewRow();
+                dr["IntegerValue1"] = i;
+                dr["StringValue1"] = "BOOM" + i;
+                dt.Rows.Add(dr);
+                i++;
+            }
+
+            var ee = new ExecutionContext()
+                         {
+                             CustomColumnMappings = new Dictionary<string, string>(),
+                             TableSchema = "dbo"
+                         };
+
+            var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
+
+            try
+            {
+                var testCollection2 =
+                    SqlMapper.KeyedMap<int, MappingTestObject>("StringValue1", testCollection1, ee, false);
+                Assert.Fail("Should fail because the property type is not valid");
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e.Message == "Property type to key does not match");
+            }
+        }
+
+        [TestMethod]
+        public void TestObjectKeyedCollectionDupeKeyNoOverrideTest()
+        {
+            var dt = new DataTable();
+            dt.Columns.AddRange(new[]
+                                    {
+                                        new DataColumn("IntegerValue1", typeof(int)),
+                                        new DataColumn("StringValue1", typeof(string))
+                                    });
+
+            var i = 0;
+            while (i < 10)
+            {
+                var dr = dt.NewRow();
+                dr["IntegerValue1"] = 1;
+                dr["StringValue1"] = "BOOM" + i;
+                dt.Rows.Add(dr);
+                i++;
+            }
+
+            var ee = new ExecutionContext()
+                         {
+                             CustomColumnMappings = new Dictionary<string, string>(),
+                             TableSchema = "dbo"
+                         };
+
+            var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
+
+            try
+            {
+                var testCollection2 =
+                    SqlMapper.KeyedMap<int, MappingTestObject>("IntegerValue1", testCollection1, ee, false);
+                Assert.Fail("Should fail because there are duplicate keys and override is set to false");
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e.Message == "Duplicate key found and no override supplied.");
+            }
+        }
+
+
+        [TestMethod]
+        public void TestObjectKeyedCollectionDupeKeyWithOverrideTest()
+        {
+            var dt = new DataTable();
+            dt.Columns.AddRange(new[]
+                                    {
+                                        new DataColumn("IntegerValue1", typeof(int)),
+                                        new DataColumn("StringValue1", typeof(string))
+                                    });
+
+            var i = 0;
+            while (i < 10)
+            {
+                var dr = dt.NewRow();
+                dr["IntegerValue1"] = 1;
+                dr["StringValue1"] = "BOOM" + i;
+                dt.Rows.Add(dr);
+                i++;
+            }
+
+            var ee = new ExecutionContext()
+                         {
+                             CustomColumnMappings = new Dictionary<string, string>(),
+                             TableSchema = "dbo"
+                         };
+
+            var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
+
+            var testCollection2 =
+                SqlMapper.KeyedMap<int, MappingTestObject>("IntegerValue1", testCollection1, ee, true);
+
+            Assert.IsTrue(testCollection2.Count == 1);
+        }
+
+        [TestMethod]
         public void TestCustomColumnMappings()
         {
             var dt = new DataTable();
@@ -196,9 +351,11 @@ namespace Tiddly.Sql.Tests
             dt.Rows.Add(dr);
 
             var helper = new SqlDataAccessHelper();
-            helper.SetPostProcessFunction<int>("IntegerValue1", x =>
-            {
-                var initial = int.Parse(x);
+            helper.SetPostProcessFunction<int>(
+                "IntegerValue1",
+                x =>
+                    {
+                        var initial = int.Parse(x);
 
                 return initial + 1;
             });
@@ -232,6 +389,21 @@ namespace Tiddly.Sql.Tests
 
             Assert.IsTrue(testO.StringValue1 == "BOOM-FORMATTED");
             Assert.IsTrue(testO.IntegerValue1 == 1);
+        }
+
+        [TestMethod]
+        public void TestObjectPropertyMappingCache()
+        {
+            SqlMapper.GenerateProperties(typeof(MappingTestObject), new ExecutionContext());
+            SqlMapper.GenerateProperties(typeof(MappingTestObject), new ExecutionContext());
+        }
+
+        [TestMethod]
+        public void EmptyDataTableShouldStilReturnAnEmptyList()
+        {
+            var testHolder = SqlMapper.Map<MappingTestObject>(new DataTable(), new ExecutionContext());
+
+            Assert.IsTrue(testHolder.Count == 0);
         }
     }
 

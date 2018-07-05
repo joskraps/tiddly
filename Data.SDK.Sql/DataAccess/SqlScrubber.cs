@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
-
-namespace Tiddly.Sql.DataAccess
+﻿namespace Tiddly.Sql.DataAccess
 {
+    using System.Text.RegularExpressions;
+
     public static class SqlScrubber
     {
         // Regex for detection of SQL meta-characters
@@ -34,10 +34,8 @@ namespace Tiddly.Sql.DataAccess
         // (\s|\+)+ - one or more whitespaces or their HTTP encoded equivalents
         // (s|x)p - the letters 'sp' or 'xp' to identify stored or extended procedures respectively
         // \w+ - one or more alphanumeric or underscore characters to complete the name of the procedure
-
         private static readonly Regex MsSqlGeneric =
             new Regex(@"/((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i", RegexOptions.Compiled);
-
 
         // Or check : checks for both the actual letters and the html encoded values of the letters. It must have either a space or horizontal tab before and after the letters or encoded values
         //   ((\%09| |\%20)(o|\%4F|\%6F)(r|\%52|\%72)(\%09| |\%20))
@@ -49,13 +47,12 @@ namespace Tiddly.Sql.DataAccess
         //   (('|\';|\%27;|;)(d|\%64|\%44)(e|\%65|\%45)(c|\%63|\%43)(l|\%6C|\%4C)(a|\%61|\%41)(r|\%72|\%52)(e|\%65|\%45)( |\%20|\%09)(\@|\%40))
         // Check for --, ‘ , /* and *\. These are all terminating and comment characters
         //   ((\-\-)|(\/\*)|(\*\/)|('*))
-
         private static readonly Regex UberRegex = new Regex(
             @"(((\%09| |\%20)(o|\%4F|\%6F)(r|\%52|\%72)(\%09| |\%20))|(('|\%27|\%09| |\%20)(a|\%61|\%41)(n|\%6E|\%4E)(d|%64|%44)(\%09| |\%20))|(('|\';|\%27;|;)( |\%09|\%20|)(e|\%65|\%45)(x|\%78|\%58)(e|\%65|\%45)(c|\%63|\%43)( |\%20|))|(('|\';|\%27;|;)(d|\%64|\%44)(e|\%65|\%45)(c|\%63|\%43)(l|\%6C|\%4C)(a|\%61|\%41)(r|\%72|\%52)(e|\%65|\%45)( |\%20|\%09)(\@|\%40))|((\-\-)|(\/\*)|(\*\/)|('*)))");
 
         public static bool IsValid(string valueToTest)
         {
-            return !MsSqlGeneric.IsMatch(valueToTest);
+            return !UberRegex.IsMatch(valueToTest);
         }
 
         public static string ScrubString(string valueToScrub)

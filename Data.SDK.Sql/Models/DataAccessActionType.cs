@@ -3,10 +3,6 @@
     public enum DataAccessActionType
     {
         Statement,
-        Procedure,
-        SelectBuilder,
-        UpdateBuilder,
-        DeleteBuilder,
-        InsertBuilder
+        Procedure
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Data;
-using System.Data.SqlClient;
-
-namespace Tiddly.Sql.Models.Transactions
+﻿namespace Tiddly.Sql.Models.Transactions
 {
+    using System;
+    using System.Data;
+    using System.Data.SqlClient;
+
     public interface ISqlUnitOfWork
     {
         bool CurrentlyOpen { get; set; }

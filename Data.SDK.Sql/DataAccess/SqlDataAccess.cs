@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using Tiddly.Sql.Mapping;
-using Tiddly.Sql.Models;
-using Tiddly.Sql.Models.Transactions;
-
-namespace Tiddly.Sql.DataAccess
+﻿namespace Tiddly.Sql.DataAccess
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Data.SqlClient;
+    using System.Diagnostics;
+
+    using Tiddly.Sql.Mapping;
+    using Tiddly.Sql.Models;
+    using Tiddly.Sql.Models.Transactions;
+
     public class SqlDataAccess
     {
         private readonly ISqlUnitOfWork unitOfWork;
@@ -20,12 +21,16 @@ namespace Tiddly.Sql.DataAccess
         public SqlDataAccess(string connectionString, ISqlUnitOfWork unitOfWork)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
+            {
                 throw new ArgumentException($"Connection string is not valid: {connectionString}");
+            }
 
-            Connection = new SqlConnection(connectionString);
+            this.Connection = new SqlConnection(connectionString);
 
             if (unitOfWork != null)
+            {
                 this.unitOfWork = unitOfWork;
+            }
         }
 
         public SqlConnection Connection { get; }
@@ -38,11 +43,12 @@ namespace Tiddly.Sql.DataAccess
 
             try
             {
+                // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (helper.ExecutionContext.DataRetrievalType)
                 {
                     case DataActionRetrievalType.DataSet:
                         accessTimer.Start();
-                        var ds = GetDataSet(helper);
+                        var ds = this.GetDataSet(helper);
                         accessTimer.Stop();
                         helper.ExecutionContext.ExecutionEvent.DataExecutionTiming = accessTimer.ElapsedTicks;
 
@@ -52,7 +58,7 @@ namespace Tiddly.Sql.DataAccess
                             return returnList;
                         }
 
-                        //mapper
+                        // mapper
                         mappingTimer.Start();
                         returnList = SqlMapper.Map<T>(ds.Tables[0], helper.ExecutionContext);
                         mappingTimer.Stop();
@@ -60,11 +66,11 @@ namespace Tiddly.Sql.DataAccess
                         break;
                     case DataActionRetrievalType.DataReader:
                         accessTimer.Start();
-                        var dr = GetDataReader(helper);
+                        var dr = this.GetDataReader(helper);
                         accessTimer.Stop();
                         helper.ExecutionContext.ExecutionEvent.DataExecutionTiming = accessTimer.ElapsedTicks;
 
-                        if (dr == null)
+                        if (dr == null || !dr.HasRows)
                         {
                             helper.ExecutionContext.ExecutionEvent.DataMappingTiming = -1;
                             return returnList;
@@ -76,8 +82,6 @@ namespace Tiddly.Sql.DataAccess
                         helper.ExecutionContext.ExecutionEvent.DataMappingTiming = mappingTimer.ElapsedTicks;
 
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
 
                 return returnList;
@@ -89,10 +93,12 @@ namespace Tiddly.Sql.DataAccess
             }
         }
 
-        public Dictionary<TKey, TObjType> FillToDictionary<TKey, TObjType>(string keyPropertyName,
-            SqlDataAccessHelper helper, bool overwriteOnDupe = false)
+        public Dictionary<TKey, TObjType> FillToDictionary<TKey, TObjType>(
+            string keyPropertyName,
+            SqlDataAccessHelper helper,
+            bool overwriteOnDupe = false)
         {
-            var initialReturn = Fill<TObjType>(helper);
+            var initialReturn = this.Fill<TObjType>(helper);
 
             var returnList =
                 SqlMapper.KeyedMap<TKey, TObjType>(keyPropertyName, initialReturn, helper.ExecutionContext, false);
@@ -102,18 +108,19 @@ namespace Tiddly.Sql.DataAccess
 
         public T Get<T>(SqlDataAccessHelper helper)
         {
-            var returnList = Fill<T>(helper);
+            var returnList = this.Fill<T>(helper);
 
             return returnList.Count == 0 ? default(T) : returnList[0];
         }
 
-        public IDataReader GetDataReader(SqlDataAccessHelper helper)
+        public SqlDataReader GetDataReader(SqlDataAccessHelper helper)
         {
-            var cmd = GetCommand(helper);
+            var cmd = this.GetCommand(helper);
 
-            PrepareConnection();
+            this.PrepareConnection();
 
-            return cmd.ExecuteReader(unitOfWork != null && unitOfWork.CurrentlyOpen
+            return cmd.ExecuteReader(
+                this.unitOfWork != null && this.unitOfWork.CurrentlyOpen
                 ? CommandBehavior.Default
                 : CommandBehavior.CloseConnection);
         }
@@ -121,20 +128,20 @@ namespace Tiddly.Sql.DataAccess
         public DataSet GetDataSet(SqlDataAccessHelper helper)
         {
             var ds = new DataSet();
-            var sqlCommand = GetCommand(helper);
+            var sqlCommand = this.GetCommand(helper);
             SqlDataAdapter sqlDa = null;
 
             try
             {
                 sqlDa = new SqlDataAdapter(sqlCommand);
 
-                PrepareConnection();
+                this.PrepareConnection();
 
                 sqlDa.Fill(ds);
             }
             finally
             {
-                FinalizeConnection();
+                this.FinalizeConnection();
 
                 sqlDa?.Dispose();
             }
@@ -142,38 +149,54 @@ namespace Tiddly.Sql.DataAccess
             return ds;
         }
 
-        public int Send(SqlDataAccessHelper helper, bool overrideCount = false)
+        //public int Send(SqlDataAccessHelper helper, bool overrideCount = false)
+        //{
+        //    var sqlCommand = this.GetCommand(helper);
+        //    this.PrepareConnection();
+        //    try
+        //    {
+        //        if (this.Connection.State == ConnectionState.Closed)
+        //        {
+        //            this.Connection.Open();
+        //        }
+
+        //        return overrideCount ? Convert.ToInt32(sqlCommand.ExecuteScalar()) : sqlCommand.ExecuteNonQuery();
+        //    }
+        //    finally
+        //    {
+        //        this.FinalizeConnection();
+
+        //        sqlCommand?.Dispose();
+        //    }
+        //}
+
+        public string GetServerName()
         {
-            var sqlCommand = GetCommand(helper);
-            PrepareConnection();
-            try
-            {
-                if (Connection.State == ConnectionState.Closed) Connection.Open();
+            var returnAccess = new SqlDataAccessHelper();
 
-                return overrideCount ? Convert.ToInt32(sqlCommand.ExecuteScalar()) : sqlCommand.ExecuteNonQuery();
-            }
-            finally
-            {
-                FinalizeConnection();
+            returnAccess.AddStatement("SELECT @@SERVERNAME");
 
-                sqlCommand?.Dispose();
-            }
+            return this.Get<string>(returnAccess);
         }
 
         private void FinalizeConnection()
         {
-            if (Connection.State != ConnectionState.Closed &&
-                (unitOfWork == null || unitOfWork.CurrentlyOpen == false))
-                Connection.Close();
+            if (this.Connection.State != ConnectionState.Closed
+                && (this.unitOfWork == null || this.unitOfWork.CurrentlyOpen == false))
+            {
+                this.Connection.Close();
+            }
         }
 
         private SqlCommand GetCommand(SqlDataAccessHelper helper)
         {
-            var sqlCommand = Connection.CreateCommand();
+            var sqlCommand = this.Connection.CreateCommand();
             sqlCommand.CommandTimeout = helper.ExecutionContext.Timeout;
 
-            if (unitOfWork != null && unitOfWork.CurrentlyOpen)
-                sqlCommand.Transaction = unitOfWork.GetSqlTransaction(Connection.ConnectionString);
+            if (this.unitOfWork != null && this.unitOfWork.CurrentlyOpen)
+            {
+                sqlCommand.Transaction = this.unitOfWork.GetSqlTransaction(this.Connection.ConnectionString);
+            }
 
             sqlCommand.CommandType = CommandType.Text;
 
@@ -186,47 +209,28 @@ namespace Tiddly.Sql.DataAccess
                     sqlCommand.CommandText = helper.ExecutionContext.ProcedureName;
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     break;
-                case DataAccessActionType.SelectBuilder:
-                    sqlCommand.CommandText = helper.SelectBuilder.BuildQuery();
-                    break;
-                case DataAccessActionType.UpdateBuilder:
-                    sqlCommand.CommandText = helper.UpdateBuilder.BuildQuery();
-                    break;
-                case DataAccessActionType.DeleteBuilder:
-                    sqlCommand.CommandText = helper.DeleteBuilder.BuildQuery();
-                    break;
-                case DataAccessActionType.InsertBuilder:
-                    sqlCommand.CommandText = helper.InsertBuilder.BuildQuery();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
 
             foreach (var parameter in helper.ExecutionContext.ParameterMappings.Values)
-                sqlCommand.Parameters.Add(new SqlParameter
-                {
-                    ParameterName = parameter.Name,
-                    Value = parameter.Value ?? DBNull.Value,
-                    SqlDbType = parameter.DataType
-                });
+            {
+                sqlCommand.Parameters.Add(
+                    new SqlParameter
+                        {
+                            ParameterName = parameter.Name,
+                            Value = parameter.Value ?? DBNull.Value,
+                            SqlDbType = parameter.DataType
+                        });
+            }
 
             return sqlCommand;
         }
 
-        // ReSharper disable once UnusedMember.Local
-        private string GetServerName()
-        {
-            var returnAccess = new SqlDataAccessHelper();
-
-            returnAccess.AddStatement("SELECT @@SERVERNAME");
-
-            return Get<string>(returnAccess);
-        }
-
         private void PrepareConnection()
         {
-            if (Connection.State == ConnectionState.Closed)
-                Connection.Open();
+            if (this.Connection.State == ConnectionState.Closed)
+            {
+                this.Connection.Open();
+            }
         }
     }
 }

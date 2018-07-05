@@ -1,27 +1,31 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using Tiddly.Sql.Models;
-
-namespace Tiddly.Sql.Mapping
+﻿namespace Tiddly.Sql.Mapping
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Diagnostics;
+    using System.Linq;
+
+    using Tiddly.Sql.Models;
+
     public static class SqlMapper
     {
         private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, ObjectPropertyMapping>>
             ObjectMappings = new ConcurrentDictionary<Type, ConcurrentDictionary<string, ObjectPropertyMapping>>();
 
-        public static Dictionary<TKey, TObjType> KeyedMap<TKey, TObjType>(string propertyToKey,
-            List<TObjType> initialReturn, ExecutionContext executionContext, bool overrideKeyOnDupe)
+        public static Dictionary<TKeyType, TObjType> KeyedMap<TKeyType, TObjType>(
+            string propertyToKey,
+            List<TObjType> initialReturn,
+            ExecutionContext executionContext,
+            bool overrideKeyOnDupe)
         {
             var timer = new Stopwatch();
             timer.Start();
             try
             {
                 var propertyToKeyToLower = propertyToKey.ToLower();
-                var returnO = new Dictionary<TKey, TObjType>();
+                var returnO = new Dictionary<TKeyType, TObjType>();
                 var baseType = typeof(TObjType);
 
                 GenerateProperties(baseType, executionContext);
@@ -29,22 +33,33 @@ namespace Tiddly.Sql.Mapping
                 var typeCheck = ObjectMappings[typeof(TObjType)];
 
                 if (!typeCheck.ContainsKey(propertyToKeyToLower))
+                {
                     throw new ArgumentException("Property to be used to key is not on the supplied object");
-                if (typeCheck[propertyToKeyToLower].ObjectPropertyInfo.PropertyType != typeof(TKey))
+                }
+
+                if (typeCheck[propertyToKeyToLower].ObjectPropertyInfo.PropertyType != typeof(TKeyType))
+                {
                     throw new ArgumentException("Property type to key does not match");
+                }
 
                 var keyedProperty = typeCheck[propertyToKeyToLower].ObjectPropertyInfo;
 
                 foreach (var item in initialReturn)
                 {
-                    var keyValue = (TKey) keyedProperty.GetValue(item, null);
+                    var keyValue = (TKeyType)keyedProperty.GetValue(item, null);
 
                     if (!returnO.ContainsKey(keyValue))
+                    {
                         returnO.Add(keyValue, item);
+                    }
                     else if (overrideKeyOnDupe)
+                    {
                         returnO[keyValue] = item;
+                    }
                     else
+                    {
                         throw new ArgumentException("Duplicate key found and no override supplied.");
+                    }
                 }
 
                 return returnO;
@@ -56,7 +71,6 @@ namespace Tiddly.Sql.Mapping
             }
         }
 
-
         public static List<T> Map<T>(DataTable dataTable, ExecutionContext executionContext)
         {
             var timer = new Stopwatch();
@@ -65,7 +79,10 @@ namespace Tiddly.Sql.Mapping
             {
                 var returnO = new List<T>();
 
-                if (dataTable.Rows.Count <= 0) return returnO;
+                if (dataTable.Rows.Count <= 0)
+                {
+                    return returnO;
+                }
 
                 var baseType = typeof(T);
 
@@ -83,15 +100,15 @@ namespace Tiddly.Sql.Mapping
 
                     var columns = Enumerable.Range(0, dataTable.Columns.Count)
                         .Select(i => dataTable.Columns[i].ColumnName).ToList();
-                    var indexer = GetPropertyIndices(columns, ObjectMappings[baseType],
+                    var indexer = GetPropertyIndices(
+                        columns,
+                        ObjectMappings[baseType],
                         executionContext,
                         executionContext.TableSchema,
                         executionContext.CustomColumnMappings);
 
-                    returnO = GenerateObjects<T>(indexer, dataTable,
-                        executionContext);
+                    returnO = GenerateObjects<T>(indexer, dataTable, executionContext);
                 }
-
 
                 return returnO;
             }
@@ -126,8 +143,9 @@ namespace Tiddly.Sql.Mapping
 
                     var columns = Enumerable.Range(0, reader.FieldCount).Select(reader.GetName).ToList();
 
-
-                    var indexer = GetPropertyIndices(columns, ObjectMappings[baseType],
+                    var indexer = GetPropertyIndices(
+                        columns,
+                        ObjectMappings[baseType],
                         executionContext,
                         executionContext.TableSchema,
                         executionContext.CustomColumnMappings);
@@ -151,14 +169,75 @@ namespace Tiddly.Sql.Mapping
             return returnO.Count > 0 ? returnO[0] : default(T);
         }
 
-        public static T MapSingle<T>(IDataReader reader, ExecutionContext helperExecutionContext)
+        public static void GenerateProperties(Type objectType, ExecutionContext context)
         {
-            var returnO = Map<T>(reader, helperExecutionContext);
+            var timer = new Stopwatch();
+            timer.Start();
+            try
+            {
+                if (ObjectMappings.ContainsKey(objectType))
+                {
+                    return;
+                }
 
-            return returnO.Count > 0 ? returnO[0] : default(T);
+                ObjectMappings.TryAdd(objectType, new ConcurrentDictionary<string, ObjectPropertyMapping>());
+
+                // Need to look at attributes on properties for type conversions
+                foreach (var pi in objectType.GetProperties())
+                {
+                    if (pi.PropertyType.IsEnum)
+                    {
+                        var wimp = new ObjectPropertyMapping
+                        {
+                            Name = pi.Name,
+                            IsEnum = true,
+                            ObjectType = pi.PropertyType,
+                            ObjectPropertyInfo = pi,
+                            IsNullable = true
+                        };
+                        ObjectMappings[objectType].TryAdd(pi.Name.ToLower(), wimp);
+                    }
+                    else if (pi.PropertyType.IsGenericType &&
+                             pi.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        var underlyingType = Nullable.GetUnderlyingType(pi.PropertyType);
+
+                        var objectPropertyMapping = new ObjectPropertyMapping
+                        {
+                            // ReSharper disable once PossibleNullReferenceException
+                            Name = underlyingType.Name,
+                            ObjectType = underlyingType,
+                            ObjectPropertyInfo = pi,
+                            IsNullable = true
+                        };
+
+                        ObjectMappings[objectType].TryAdd(pi.Name.ToLower(), objectPropertyMapping);
+                    }
+                    else if (pi.PropertyType.IsValueType
+                             || pi.PropertyType.Name == "String"
+                             || pi.PropertyType.Name == "Byte[]")
+                    {
+                        var objectPropertyMapping = new ObjectPropertyMapping
+                        {
+                            Name = pi.Name,
+                            ObjectType = pi.PropertyType,
+                            ObjectPropertyInfo = pi
+                        };
+                        ObjectMappings[objectType].TryAdd(pi.Name.ToLower(), objectPropertyMapping);
+                    }
+                }
+            }
+            finally
+            {
+                timer.Stop();
+                context.ExecutionEvent.GeneratePropertiesTiming = timer.ElapsedTicks;
+            }
         }
 
-        private static void SetProperty<T>(ref T newO, ObjectPropertyMapping indexerVal, string tempValue,
+        private static void SetProperty<T>(
+            ref T newO,
+            ObjectPropertyMapping indexerVal,
+            string tempValue,
             CustomMappingFunction customMappingFunction)
         {
             if (customMappingFunction != null)
@@ -168,40 +247,60 @@ namespace Tiddly.Sql.Mapping
             else
             {
                 if (indexerVal.ObjectType == typeof(Guid))
+                {
                     indexerVal.ObjectPropertyInfo.SetValue(newO, new Guid(tempValue), null);
+                }
                 else if (indexerVal.ObjectPropertyInfo.PropertyType.IsEnum)
-                    indexerVal.ObjectPropertyInfo.SetValue(newO,
-                        Enum.Parse(indexerVal.ObjectPropertyInfo.PropertyType, tempValue), null);
-                else
-                    indexerVal.ObjectPropertyInfo.SetValue(newO, Convert.ChangeType(tempValue, indexerVal.ObjectType),
+                {
+                    indexerVal.ObjectPropertyInfo.SetValue(
+                        newO,
+                        Enum.Parse(indexerVal.ObjectPropertyInfo.PropertyType, tempValue),
                         null);
+                }
+                else
+                {
+                    indexerVal.ObjectPropertyInfo.SetValue(
+                        newO,
+                        Convert.ChangeType(tempValue, indexerVal.ObjectType),
+                        null);
+                }
             }
         }
 
-        private static T GenerateObject<T>(DataRecordAdapter row, Dictionary<int, ObjectPropertyMapping> indexer,
+        private static T GenerateObject<T>(
+            DataRecordAdapter row,
+            Dictionary<int, ObjectPropertyMapping> indexer,
             ExecutionContext context)
         {
             var newO = Activator.CreateInstance<T>();
 
             foreach (var key in indexer.Keys)
             {
-                if (row[key] == null || row[key] == DBNull.Value) continue;
-
+                if (row[key] == null || row[key] == DBNull.Value)
+                {
+                    continue;
+                }
 
                 var indexerVal = indexer[key];
                 var columnName = indexerVal.Name.ToLower();
                 var tempValue = row[key];
 
-                SetProperty(ref newO, indexerVal, tempValue.ToString(),
-                    context.ParameterMappingFunctionCollection.ContainsKey(columnName)
-                        ? context.ParameterMappingFunctionCollection[columnName]
-                        : null);
+                var customMapping = context.ParameterMappingFunctionCollection.ContainsKey(columnName)
+                                        ? context.ParameterMappingFunctionCollection[columnName]
+                                        : null;
+                SetProperty(
+                    ref newO,
+                    indexerVal,
+                    tempValue.ToString(),
+                    customMapping);
             }
 
             return newO;
         }
 
-        private static List<T> GenerateObjects<T>(Dictionary<int, ObjectPropertyMapping> indexer, DataTable data,
+        private static List<T> GenerateObjects<T>(
+            Dictionary<int, ObjectPropertyMapping> indexer,
+            DataTable data,
             ExecutionContext context)
         {
             var timer = new Stopwatch();
@@ -211,13 +310,12 @@ namespace Tiddly.Sql.Mapping
             {
                 foreach (DataRow dataRow in data.Rows)
                 {
-                    var adaptor = new DataRecordAdapter(dataRow);
+                    var adapter = new DataRecordAdapter(dataRow);
 
-                    returnList.Add(GenerateObject<T>(adaptor, indexer, context));
+                    returnList.Add(GenerateObject<T>(adapter, indexer, context));
                 }
             }
             finally
-
             {
                 timer.Stop();
                 context.ExecutionEvent.DataMappingTiming = timer.ElapsedTicks;
@@ -226,7 +324,9 @@ namespace Tiddly.Sql.Mapping
             return returnList;
         }
 
-        private static List<T> GenerateObjects<T>(Dictionary<int, ObjectPropertyMapping> indexer, IDataReader data,
+        private static List<T> GenerateObjects<T>(
+            Dictionary<int, ObjectPropertyMapping> indexer,
+            IDataReader data,
             ExecutionContext context)
         {
             var timer = new Stopwatch();
@@ -239,16 +339,15 @@ namespace Tiddly.Sql.Mapping
                 {
                     while (data.Read())
                     {
-                        var adaptor = new DataRecordAdapter(data);
+                        var adapter = new DataRecordAdapter(data);
 
-                        returnList.Add(GenerateObject<T>(adaptor, indexer, context));
+                        returnList.Add(GenerateObject<T>(adapter, indexer, context));
                     }
                 }
 
                 return returnList;
             }
             finally
-
             {
                 timer.Stop();
                 context.ExecutionEvent.DataMappingTiming = timer.ElapsedTicks;
@@ -264,7 +363,9 @@ namespace Tiddly.Sql.Mapping
                 var returnList = new List<T>();
 
                 foreach (DataRow dr in dataTable.Rows)
-                    returnList.Add((T) Convert.ChangeType(dr[0], typeof(T)));
+                {
+                    returnList.Add((T)Convert.ChangeType(dr[0], typeof(T)));
+                }
 
                 return returnList;
             }
@@ -286,7 +387,9 @@ namespace Tiddly.Sql.Mapping
                 using (reader)
                 {
                     while (reader.Read())
-                        returnList.Add((T) Convert.ChangeType(reader[0], typeof(T)));
+                    {
+                        returnList.Add((T)Convert.ChangeType(reader[0], typeof(T)));
+                    }
                 }
 
                 return returnList;
@@ -311,7 +414,7 @@ namespace Tiddly.Sql.Mapping
                     // ReSharper disable once AssignNullToNotNullAttribute
                     var safeValue = dr.IsNull(0) ? null : Convert.ChangeType(dr[0], underlyingType);
 
-                    returnList.Add((T) safeValue);
+                    returnList.Add((T)safeValue);
                 }
 
                 return returnList;
@@ -339,7 +442,7 @@ namespace Tiddly.Sql.Mapping
                         // ReSharper disable once AssignNullToNotNullAttribute
                         var safeValue = reader.IsDBNull(0) ? null : Convert.ChangeType(reader[0], underlyingType);
 
-                        returnList.Add((T) safeValue);
+                        returnList.Add((T)safeValue);
                     }
                 }
 
@@ -352,84 +455,12 @@ namespace Tiddly.Sql.Mapping
             }
         }
 
-        private static void GenerateProperties(Type objectType, ExecutionContext context)
-        {
-            var timer = new Stopwatch();
-            timer.Start();
-            try
-            {
-                if (ObjectMappings.ContainsKey(objectType)) return;
-
-                ObjectMappings.TryAdd(objectType, new ConcurrentDictionary<string, ObjectPropertyMapping>());
-
-                // Need to look at attributes on properties for type conversions
-                foreach (var pi in objectType.GetProperties())
-                {
-                    if (ObjectMappings[objectType].ContainsKey(pi.PropertyType.Name)) continue;
-
-                    if (pi.PropertyType.IsEnum)
-                    {
-                        var iwpm = new ObjectPropertyMapping
-                        {
-                            Name = pi.Name,
-                            IsEnum = true,
-                            ObjectType = pi.PropertyType,
-                            ObjectPropertyInfo = pi,
-                            IsNullable = true
-                        };
-                        ObjectMappings[objectType].TryAdd(pi.Name.ToLower(), iwpm);
-                    }
-                    else if (pi.PropertyType.IsGenericType &&
-                             pi.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    {
-                        var piUnderlyingType = Nullable.GetUnderlyingType(pi.PropertyType);
-
-                        if (piUnderlyingType == null) continue;
-
-                        var iwpm = new ObjectPropertyMapping
-                        {
-                            Name = piUnderlyingType.Name,
-                            ObjectType = piUnderlyingType,
-                            ObjectPropertyInfo = pi,
-                            IsNullable = true
-                        };
-
-                        ObjectMappings[objectType].TryAdd(pi.Name.ToLower(), iwpm);
-                    }
-                    else if (pi.PropertyType.IsValueType
-                             || pi.PropertyType.Name == "String")
-                    {
-                        var iwpm = new ObjectPropertyMapping
-                        {
-                            Name = pi.Name,
-                            ObjectType = pi.PropertyType,
-                            ObjectPropertyInfo = pi
-                        };
-                        ObjectMappings[objectType].TryAdd(pi.Name.ToLower(), iwpm);
-                    }
-                    else if (pi.PropertyType.Name == "Byte[]")
-                    {
-                        var iwpm = new ObjectPropertyMapping
-                        {
-                            Name = pi.Name,
-                            ObjectType = pi.PropertyType,
-                            ObjectPropertyInfo = pi
-                        };
-                        ObjectMappings[objectType].TryAdd(pi.Name.ToLower(), iwpm);
-                    }
-                }
-            }
-            finally
-            {
-                timer.Stop();
-                context.ExecutionEvent.GeneratePropertiesTiming = timer.ElapsedTicks;
-            }
-        }
-
         private static Dictionary<int, ObjectPropertyMapping> GetPropertyIndices(
-            IReadOnlyList<string> columns, IDictionary<string, ObjectPropertyMapping> propertyList,
+            IReadOnlyList<string> columns,
+            IDictionary<string, ObjectPropertyMapping> propertyList,
             ExecutionContext context,
-            string tablePrefix = null, IDictionary<string, string> customMappings = null)
+            string tablePrefix = null,
+            IDictionary<string, string> customMappings = null)
         {
             var timer = new Stopwatch();
             timer.Start();
@@ -459,15 +490,17 @@ namespace Tiddly.Sql.Mapping
                         }
                     }
 
-                    if (customMappings == null) continue;
-
+                    // ReSharper disable once PossibleNullReferenceException
                     var customListCheck = customMappings.ContainsKey(columns[i].ToLower());
 
-                    if (!customListCheck) continue;
+                    if (!customListCheck)
+                    {
+                        continue;
+                    }
 
-                    var custMap = customMappings[columns[i].ToLower()];
+                    var customMap = customMappings[columns[i].ToLower()];
 
-                    returnDictionary.Add(i, propertyList[custMap.ToLower()]);
+                    returnDictionary.Add(i, propertyList[customMap.ToLower()]);
                 }
 
                 return returnDictionary;
@@ -484,6 +517,7 @@ namespace Tiddly.Sql.Mapping
             var baseType = typeof(T);
 
             return baseType.IsPrimitive
+
                    // This treats these types as primitives even though they are technically objects.
                    // Something else we can do is check the namespace - the types we care about all all in System.x
                    || baseType == typeof(decimal)
