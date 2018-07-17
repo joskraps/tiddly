@@ -1,0 +1,17 @@
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.deps.json
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.runtimeconfig.json
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.runtimeconfig.dev.json
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.dll
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.pdb
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.csprojAssemblyReference.cache
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.csproj.CoreCompileInputs.cache
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.AssemblyInfoInputs.cache
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.AssemblyInfo.cs
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.csproj.CopyComplete
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.dll
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.Tests.pdb
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Tiddly.Sql.dll
+C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core.Tests\bin\Debug\netcoreapp2.1\Tiddly.Sql.pdb

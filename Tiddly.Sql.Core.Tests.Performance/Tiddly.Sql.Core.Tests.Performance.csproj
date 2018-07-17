@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.10.14" />
+    <PackageReference Include="Dapper" Version="1.50.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tiddly.Sql.Core.Tests\Tiddly.Sql.Core.Tests.csproj" />
+    <ProjectReference Include="..\Tiddly.Sql.Core\Tiddly.Sql.Core.csproj" />
+  </ItemGroup>
+
+</Project>
