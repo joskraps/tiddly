@@ -1,8 +1,8 @@
 # tiddly
 
 [<img
-src="https://joskraps.visualstudio.com/_apis/public/build/definitions/e59eb71d-cb8a-4975-a09a-982754e10894/2/badge"/>](https://joskraps.visualstudio.com/Tiddly/_build/index?definitionId=2)
-[![NuGet Badge](https://buildstats.info/nuget/tiddly-sql)](https://www.nuget.org/packages/tiddly-sql/)
+src="https://joskraps.visualstudio.com/_apis/public/build/definitions/e59eb71d-cb8a-4975-a09a-982754e10894/3/badge"/>](https://joskraps.visualstudio.com/Tiddly/_build/index?definitionId=2)
+[![NuGet Badge](https://buildstats.info/nuget/tiddly.sql)](https://www.nuget.org/packages/tiddly.sql/)
 
 Tiddly is a lightweight sql ORM that handles convention based property mappings to domain objects.
 
