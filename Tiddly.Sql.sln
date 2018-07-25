@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiddly.Sql.Core.Tests", "Ti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiddly.Sql.Core.Tests.Performance", "Tiddly.Sql.Core.Tests.Performance\Tiddly.Sql.Core.Tests.Performance.csproj", "{F9C6BF43-DFA6-404F-89D8-8A5AF7F27C84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiddly.Tests", "Tiddly.Tests\Tiddly.Tests.csproj", "{527E879D-8BD3-41AD-8F32-BD72AB14B01D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,12 +34,8 @@ Global
 		{2E68BD11-94FE-473B-A267-046DCDFB9AF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E68BD11-94FE-473B-A267-046DCDFB9AF5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F9C6BF43-DFA6-404F-89D8-8A5AF7F27C84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9C6BF43-DFA6-404F-89D8-8A5AF7F27C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9C6BF43-DFA6-404F-89D8-8A5AF7F27C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9C6BF43-DFA6-404F-89D8-8A5AF7F27C84}.Release|Any CPU.Build.0 = Release|Any CPU
-		{527E879D-8BD3-41AD-8F32-BD72AB14B01D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{527E879D-8BD3-41AD-8F32-BD72AB14B01D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{527E879D-8BD3-41AD-8F32-BD72AB14B01D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{527E879D-8BD3-41AD-8F32-BD72AB14B01D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
