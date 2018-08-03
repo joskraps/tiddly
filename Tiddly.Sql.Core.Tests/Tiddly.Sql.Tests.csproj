@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tiddly.Sql.Core\Tiddly.Sql.Core.csproj" />
+    <ProjectReference Include="..\Tiddly.Sql.Core\Tiddly.Sql.csproj" />
   </ItemGroup>
 
 </Project>

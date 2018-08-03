@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;netstandard2.0</TargetFrameworks>
+    <AssemblyName>Tiddly.Sql</AssemblyName>
+    <Authors>Joel Sparks (joskraps@gmail.com)</Authors>
+    <PackageProjectUrl>https://github.com/joskraps/tiddly</PackageProjectUrl>
+    <Description>Micro SQL ORM</Description>
+    <PackageTags>SQL ORM</PackageTags>
+    <RepositoryUrl>https://github.com/joskraps/tiddly</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.5.1" />
+  </ItemGroup>
+
+</Project>

@@ -8,3 +8,9 @@ Data.SDK.Sql/bin/
 packages/
 .vs/
 Data.SDK.Sql/nuget.exe
+Tiddly.Sql.Core.Tests/obj/
+Tiddly.Sql.Core.Tests.Performance/bin/
+Tiddly.Sql.Core.Tests.Performance/obj/
+Tiddly.Sql.Core.Tests/bin/
+Tiddly.Sql.Core/bin/
+Tiddly.Sql.Core/obj/

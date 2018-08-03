@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tiddly.Sql.Core.Tests\Tiddly.Sql.Core.Tests.csproj" />
-    <ProjectReference Include="..\Tiddly.Sql.Core\Tiddly.Sql.Core.csproj" />
+    <ProjectReference Include="..\Tiddly.Sql.Core.Tests\Tiddly.Sql.Tests.csproj" />
+    <ProjectReference Include="..\Tiddly.Sql.Core\Tiddly.Sql.csproj" />
   </ItemGroup>
 
 </Project>
