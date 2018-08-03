@@ -13,7 +13,7 @@ Tiddly is a lightweight SQL ORM that handles convention based property mapping c
 var helper = new SqlDataAccessHelper();
 ```
 
-The helper is a settings object that definese how the transaction will execute. 
+The helper is a settings object that define how the transaction will execute. 
 
 ### AddProcedure
 ```csharp
