@@ -1,9 +1,0 @@
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.csprojAssemblyReference.cache
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.csproj.CoreCompileInputs.cache
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.AssemblyInfoInputs.cache
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\obj\Debug\netcoreapp2.1\Tiddly.Sql.Core.AssemblyInfo.cs
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\bin\Debug\netcoreapp2.1\Tiddly.Sql.deps.json
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\bin\Debug\netcoreapp2.1\Tiddly.Sql.dll
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\bin\Debug\netcoreapp2.1\Tiddly.Sql.pdb
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\obj\Debug\netcoreapp2.1\Tiddly.Sql.dll
-C:\Users\jskra\source\repos\tiddly\Tiddly.Sql.Core\obj\Debug\netcoreapp2.1\Tiddly.Sql.pdb

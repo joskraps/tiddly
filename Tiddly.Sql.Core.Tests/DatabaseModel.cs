@@ -1,7 +1,7 @@
-﻿namespace Tiddly.Sql.Tests
-{
-    using System;
+﻿using System;
 
+namespace Tiddly.Sql.Core.Tests
+{
     public class DatabaseModel
     {
         public Guid BrokerGuid { get; set; }

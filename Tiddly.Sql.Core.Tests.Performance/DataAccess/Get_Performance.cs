@@ -5,6 +5,7 @@ using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Attributes.Columns;
 using Dapper;
+using Tiddly.Sql.Core.Tests;
 using Tiddly.Sql.DataAccess;
 using Tiddly.Sql.Models;
 

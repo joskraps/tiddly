@@ -1,18 +1,24 @@
 ﻿// ReSharper disable StringLiteralTypo
-namespace Tiddly.Sql.Tests
+
+using System;
+using System.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Extensions;
+using Tiddly.Sql.DataAccess;
+using Tiddly.Sql.Models;
+
+
+namespace Tiddly.Sql.Core.Tests
 {
-    using System;
-    using System.Data;
-
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Tiddly.Sql.DataAccess;
-    using Tiddly.Sql.Models;
-
     [TestClass]
     public class SqlDataAccessTests
     {
-        private const string ConnectionString = "Data Source=DESKTOP-RC3RG6H\\SKRAPS;Initial Catalog=master;Integrated Security=True";
+        private readonly string ConnectionString = "";
+
+        public SqlDataAccessTests()
+        {
+            ConnectionString =  ConfigHelper.GetConfigRoot()["DbConnection"];
+        }
 
         [TestMethod]
         public void FillFromStatementWithDataReaderWithObjectReturn()
