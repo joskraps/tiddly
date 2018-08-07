@@ -106,6 +106,11 @@
             return returnList;
         }
 
+        public int Execute(SqlDataAccessHelper helper)
+        {
+            return Get<int>(helper);
+        }
+
         public T Get<T>(SqlDataAccessHelper helper)
         {
             var returnList = this.Fill<T>(helper);
