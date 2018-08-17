@@ -1,6 +1,7 @@
 # tiddly sql
 
-[](https://joskraps.visualstudio.com/Tiddly/_build/index?definitionId=2)
+[<img
+src="https://joskraps.visualstudio.com/_apis/public/build/definitions/e59eb71d-cb8a-4975-a09a-982754e10894/3/badge"/>](https://joskraps.visualstudio.com/Tiddly/_build/index?definitionId=2)
 [![NuGet Badge](https://buildstats.info/nuget/Tiddly.Sql)](https://www.nuget.org/packages/Tiddly.Sql/)
 
 Tiddly is a lightweight SQL ORM that handles convention based property mapping convert data results into domain objects or simple primitive types. Tiddly can be used without the mapping functionality and simply used to eliminate boilerplate command object code for data retrieval. 
