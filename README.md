@@ -9,10 +9,10 @@ Tiddly is a lightweight SQL ORM that handles convention based property mapping c
 
 A data access helper object is used to define the transaction. It includes what statement or procedure will be executed, which parameters should be used, column mappings, and post processing functions.
 
-“`csharp
-var helper = new SqlDataAccessHelper(). AddStatement("select 0 [EnumType] union all select 1");
-var values = new SqlDataAccess(ConnectionString). Fill(helper);
-“`
+```csharp
+var helper = new SqlDataAccessHelper().AddStatement("select 0 [EnumType] union all select 1");
+var values = new SqlDataAccess(ConnectionString).Fill<TestClassWithEnum>(helper);
+```
 
 That's all it takes to retrieve data from your instance!
 
@@ -20,9 +20,9 @@ That's all it takes to retrieve data from your instance!
 
 The helper is a setting object that define how the transaction will execute. It is required to utilize the data access object. 
 
-“`csharp
+```csharp
 var helper = new SqlDataAccessHelper();
-“`
+```
 
 The helper has a fluent api that exposes the following functions for configuring the helper object:
 
@@ -30,52 +30,52 @@ The helper has a fluent api that exposes the following functions for configuring
 
 Adds the stored procedure to execute and optionally the schema to be used.
 
-“`csharp
+```csharp
 SqlDataAccessHelper AddProcedure(string procedureName, string schema = "dbo")
-“`
+```
 
 #### AddStatement
 
 Adds a sql statement to be executed. This query can be parameterized.
 
-“`csharp
+```csharp
 SqlDataAccessHelper AddStatement(string stringStatement)
-“`
+```
 
 #### AddParameter
 
 Adds a parameter that will be used in the supplied stored procedure or parameterized query. If scrub value is set to true, the string value will be used in a reg ex replace using a generic pattern. See here:
 
-“`csharp
+```csharp
 SqlDataAccessHelper AddParameter(string name, object value, SqlDbType datatype, bool scrubValue = false)
-“`
+```
 
 #### Property
 
 Retrieves the propery mapping for the provided string property name.
 
-“`csharp
+```csharp
 ParameterMapping Property(string name)
-“`
+```
 
 #### AddCustomMapping
 
 Supplies an alias for the target property. This will allow you to map properties to columns when the names do not match.
 
-“`csharp
+```csharp
 SqlDataAccessHelper AddCustomMapping(string alias, string targetProperty)
-“`
+```
 
 #### SetPostProcessFunction
 
 This allows a function to be defined that will execute after the value has been set. The value is supplied as a string and will be cast to the target property type from the function return.
 
-“`csharp
+```csharp
 SqlDataAccessHelper SetPostProcessFunction(string targetProperty,
  Func mappingFunction)
-“`
+```
 
-“`csharp
+```csharp
 var da = new SqlDataAccess(ConnectionString);
 var helper = new SqlDataAccessHelper();
 
@@ -87,30 +87,30 @@ helper. AddParameter("model", "model", SqlDbType. VarChar);
 helper. AddParameter("msdb", "msdb", SqlDbType. VarChar);
 helper. SetPostProcessFunction("name", s => s == "master" ? "MAPPING FUNCTION" : s);
 
-var returnable = da. Get(helper);
+var returnable = da.Get<DatabaseModel>(helper);
 
 this. OutputTestTimings(helper. ExecutionContext);
 
 Assert. AreEqual(returnable. Name, "MAPPING FUNCTION");
 Assert. IsTrue(returnable.I'd != 0);
 Assert. AreEqual(returnable. BrokerGuid, Guid. Empty);
-“`
+```
 
 #### SetRetrievalMode
 
 Allows you to switch between using a data reader or data set. Data reader should be the most perform ant of the two.
 
-“`csharp
+```csharp
 SqlDataAccessHelper SetRetrievalMode(DataActionRetrievalType type)
-“`
+```
 
 #### SetTimeout
 
 Sets the connection timeout on the underlying command object.
 
-“`csharp
+```csharp
 SqlDataAccessHelper SetTimeout(int timeoutValue)
-“`
+```
 ### SqlDataAccess object
 
 The data access object is what actually creates the command and opens the connection/retrieves the data. 
@@ -120,10 +120,10 @@ The data access object is what actually creates the command and opens the connec
 #### Fill
 Fills a list with the supplied object or primitive value. Unless property mappings are supplied, this will attempt to match properties to column names. 
 
-“`csharp
-List Fill(SqlDataAccessHelper helper)
-“`
-“`csharp
+```csharp
+IList<T> Fill<T>(SqlDataAccessHelper helper)
+```
+```csharp
 var da = new SqlDataAccess(connectionString);
 var helper = new SqlDataAccessHelper();
 
@@ -132,10 +132,10 @@ helper. AddParameter("master", "master", SqlDbType. VarChar);
 helper. AddParameter("model", "model", SqlDbType. VarChar);
 helper. AddParameter("msdb", "msdb", SqlDbType. VarChar);
 
-var values = da. Fill(helper);
-“`
+var values = da.Fill<string>(helper);
+```
 
-“`csharp
+```csharp
 private class DbHelpModel
 {
  public string Name {get; set;}
@@ -149,22 +149,22 @@ var helper = new SqlDataAccessHelper();
 helper. SetRetrievalMode(DataActionRetrievalType. DataReader);
 helper. AddProcedure("sp_help");
 
-var values = da. Fill(helper);
-“`
+var values = da.Fill<DbHelpModel>(helper);
+```
 
 #### FillToDictionary
 Same as filling to a list but allows you to specify a property that will key a dictionary. An exception will be thrown if the property does not exist, the property type does not match, or duplicate values are found for the key. Duplicate key behaviour can be overridden so that the key value will overwrite instead of throwing an exception.
 
-“`csharp
-Dictionary FillToDictionary(string keyPropertyName, SqlDataAccessHelper helper, bool overwriteOnDupe = false)
-“`
-“`csharp
+```csharp
+Dictionary<TKey, TObjType> FillToDictionary<TKey, TObjType>(string keyPropertyName, SqlDataAccessHelper helper, bool overwriteOnDupe = false)
+```
+```csharp
 public class DatabaseModel
 {
  public string Name {get; set;}
  public Guid BrokerGuid {get; set;}
  public DateTime CreateDate {get; set;}
- public int I'd {get; set;}
+ public int Id {get; set;}
  public bool ReadOnly {get; set;}
 
 }
@@ -177,8 +177,8 @@ helper. AddParameter("master", "master", SqlDbType. VarChar);
 helper. AddParameter("model", "model", SqlDbType. VarChar);
 helper. AddParameter("msdb", "msdb", SqlDbType. VarChar);
 
-var values = da. FillToDictionary("I'd", helper);
-“`
+var values = da.FillToDictionary<int,DatabaseModel>("Id",helper);
+```
 
 ### Single object/value fill
 Returns an instance of type T that you specify: can be an object or primitive type. Does not support nested objects
@@ -187,13 +187,13 @@ Returns an instance of type T that you specify: can be an object or primitive ty
 
 Returns the scalar int value that is produced from executing the statement. This is more useful for DML type actions where the return is the number of rows effected or status code.
 
-“`csharp
+```csharp
 int Execute(SqlDataAccessHelper helper)
-“`
+```
 
-#### Get — primitive
-“`csharp
-T Get(SqlDataAccessHelper helper)
+#### Get - primitive
+```csharp
+T Get<T>(SqlDataAccessHelper helper)
 
 var da = new SqlDataAccess(ConnectionString);
 var helper = new SqlDataAccessHelper();
@@ -205,11 +205,11 @@ helper. AddParameter("master", "master", SqlDbType. VarChar);
 helper. AddParameter("model", "model", SqlDbType. VarChar);
 helper. AddParameter("msdb", "msdb", SqlDbType. VarChar);
 
-var returnable = da. Get(helper);
-“`
+var returnValue = da.Get<string>(helper);
+```
 
-#### Get — object
-“`csharp
+#### Get - object
+```csharp
 var da = new SqlDataAccess(ConnectionString);
 var helper = new SqlDataAccessHelper();
 
@@ -220,17 +220,17 @@ helper. AddParameter("master", "master", SqlDbType. VarChar);
 helper. AddParameter("model", "model", SqlDbType. VarChar);
 helper. AddParameter("msdb", "msdb", SqlDbType. VarChar);
 
-var returnable = da. Get(helper);
-“`
+var returnValue = da.Get<DatabaseModel>(helper);
+```
 
 ### GetDataReader / GetDataSet
 
 Can be used to get the raw data structures if you just want something to get the raw data for you.
 
-“`csharp
+```csharp
 IDataReader GetDataReader(SqlDataAccessHelper helper)
 DataSet GetDataSet(SqlDataAccessHelper helper)
-“`
+```
 
 ### Performance 
 
@@ -250,30 +250,31 @@ Using some quick performance comparisons, Tiddly is on par with mainstream libra
 |Base | Get string | 217.5 us | 3.066 us | 2.868 us | 217.0 us | 214.1 us | 222.7 us |
 
 #### Legends
- — Mean : Arithmetic mean of all measurements
- — Error : Half of 99.9% confidence interval
- — StdDev : Standard deviation of all measurements
- — Median : Value separating the higher half of all measurements (50th percentile)
- — Min : Minimum
- — Max : Maximum
- — 1 us : 1 Microsecond (0.000001 sec)
+ - Mean : Arithmetic mean of all measurements
+ - Error : Half of 99.9% confidence interval
+ - StdDev : Standard deviation of all measurements
+ - Median : Value separating the higher half of all measurements (50th percentile)
+ - Min : Minimum
+ - Max : Maximum
+ - 1 us : 1 Microsecond (0.000001 sec)
 
 
 ## Development
 ### Building the repo
-Priers:
-—.NET SDK (can be used via command line or visual studio)
-— Local sql server instance. Tests utilize system dbs so no specific database is needed. Express can be used
+Prereqs:
+
+- .NET SDK (can be used via command line or visual studio)
+- Local sql server instance. Tests utilize system dbs so no specific database is needed. Express can be used
 
 Build
-“`csharp
-dotnet build Tiddly.Sql. Core\Tiddly.Sql.csproj --configuration release
-“`
+```csharp
+dotnet build Tiddly.Sql.Core\Tiddly.Sql.csproj --configuration release
+```
 
 Test
-“`csharp
-dotnet test Tiddly.Sql. Core. Tests\Tiddly.Sql. Tests.csproj --configuration release
-“`
+```csharp
+dotnet test Tiddly.Sql.Core.Tests\Tiddly.Sql.Tests.csproj --configuration release
+```
  
 ### Contributing
 
