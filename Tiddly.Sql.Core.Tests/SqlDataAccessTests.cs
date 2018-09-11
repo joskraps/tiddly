@@ -3,12 +3,10 @@
 using System;
 using System.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Extensions;
 using Tiddly.Sql.DataAccess;
 using Tiddly.Sql.Models;
 
-
-namespace Tiddly.Sql.Core.Tests
+namespace Tiddly.Sql.Tests
 {
     [TestClass]
     public class SqlDataAccessTests
@@ -242,6 +240,7 @@ namespace Tiddly.Sql.Core.Tests
         {
             var da = new SqlDataAccess(ConnectionString);
             var helper = new SqlDataAccessHelper();
+
             helper.SetRetrievalMode(DataActionRetrievalType.DataReader);
             helper.AddStatement(
                 "select top 1 name,database_id [Id],is_read_only [ReadOnly],service_broker_guid [BrokerGuid],create_date [CreateDate] from sys.databases where name in (@master,@model,@msdb) order by 1 asc");
@@ -349,6 +348,7 @@ namespace Tiddly.Sql.Core.Tests
         {
             var da = new SqlDataAccess(ConnectionString);
             var helper = new SqlDataAccessHelper();
+
             helper.SetRetrievalMode(DataActionRetrievalType.DataSet);
             helper.AddStatement(
                 "select top 1 name from sys.databases where name in (@master,@model,@msdb) order by 1 asc");
@@ -357,6 +357,7 @@ namespace Tiddly.Sql.Core.Tests
             helper.AddParameter("msdb", "msdb", SqlDbType.VarChar);
 
             var returnValue = da.Get<string>(helper);
+
             this.OutputTestTimings(helper.ExecutionContext);
             Assert.AreEqual(returnValue, "master");
         }

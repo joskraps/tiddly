@@ -3,7 +3,7 @@
     using System;
     using System.Data;
 
-    using Tiddly.Sql.Models;
+    using Models;
 
     public sealed class SqlDataAccessHelper
     {
@@ -11,7 +11,7 @@
 
         public SqlDataAccessHelper()
         {
-            this.ExecutionContext = new ExecutionContext
+            ExecutionContext = new ExecutionContext
             {
                 DataRetrievalType = DataActionRetrievalType.DataReader,
                 ExecutionEvent = new ExecutionEvent()
@@ -45,7 +45,7 @@
                 dataType = SqlDbType.VarChar;
             }
 
-            this.ExecutionContext.ParameterMappings.Add(
+            ExecutionContext.ParameterMappings.Add(
                 name.ToLower(),
                 new ParameterMapping
                     {
@@ -60,25 +60,25 @@
 
         public SqlDataAccessHelper AddProcedure(string procedureName, string schema = "dbo")
         {
-            this.ExecutionContext.ProcedureSchema = schema;
-            this.ExecutionContext.ProcedureName = string.Join(".", schema, procedureName);
-            this.ExecutionContext.ActionType = DataAccessActionType.Procedure;
+            ExecutionContext.ProcedureSchema = schema;
+            ExecutionContext.ProcedureName = string.Join(".", schema, procedureName);
+            ExecutionContext.ActionType = DataAccessActionType.Procedure;
 
             return this;
         }
 
         public SqlDataAccessHelper AddStatement(string stringStatement)
         {
-            this.ExecutionContext.Statement = stringStatement;
-            this.ExecutionContext.ActionType = DataAccessActionType.Statement;
+            ExecutionContext.Statement = stringStatement;
+            ExecutionContext.ActionType = DataAccessActionType.Statement;
 
             return this;
         }
 
         public ParameterMapping Property(string name)
         {
-            return this.ExecutionContext.ParameterMappings.ContainsKey(name)
-                ? this.ExecutionContext.ParameterMappings[name]
+            return ExecutionContext.ParameterMappings.ContainsKey(name)
+                ? ExecutionContext.ParameterMappings[name]
                 : null;
         }
 
@@ -95,13 +95,13 @@
                 TargetType = typeof(T)
             };
 
-            if (this.ExecutionContext.ParameterMappingFunctionCollection.ContainsKey(targetProperty))
+            if (ExecutionContext.ParameterMappingFunctionCollection.ContainsKey(targetProperty))
             {
-                this.ExecutionContext.ParameterMappingFunctionCollection[targetProperty] = mappingFunctionWrapper;
+                ExecutionContext.ParameterMappingFunctionCollection[targetProperty] = mappingFunctionWrapper;
             }
             else
             {
-                this.ExecutionContext.ParameterMappingFunctionCollection.Add(targetProperty, mappingFunctionWrapper);
+                ExecutionContext.ParameterMappingFunctionCollection.Add(targetProperty, mappingFunctionWrapper);
             }
 
             return this;
@@ -109,14 +109,14 @@
 
         public SqlDataAccessHelper SetRetrievalMode(DataActionRetrievalType type)
         {
-            this.ExecutionContext.DataRetrievalType = type;
+            ExecutionContext.DataRetrievalType = type;
 
             return this;
         }
 
         public SqlDataAccessHelper SetTimeout(int timeoutValue)
         {
-            this.ExecutionContext.Timeout = timeoutValue;
+            ExecutionContext.Timeout = timeoutValue;
 
             return this;
         }
@@ -125,12 +125,12 @@
 
         public SqlDataAccessHelper AddCustomMapping(string alias, string targetProperty)
         {
-            if (!this.ExecutionContext.CustomColumnMappings.ContainsKey(alias))
+            if (!ExecutionContext.CustomColumnMappings.ContainsKey(alias))
             {
-                this.ExecutionContext.CustomColumnMappings.Add(alias, string.Empty);
+                ExecutionContext.CustomColumnMappings.Add(alias, string.Empty);
             }
 
-            this.ExecutionContext.CustomColumnMappings[alias] = targetProperty;
+            ExecutionContext.CustomColumnMappings[alias] = targetProperty;
 
             return this;
         }

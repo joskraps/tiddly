@@ -5,15 +5,12 @@
     using System.Data;
     using System.Data.SqlClient;
     using System.Diagnostics;
+    using Sql.Mapping;
+    using Models;
 
-    using Tiddly.Sql.Mapping;
-    using Tiddly.Sql.Models;
-    using Tiddly.Sql.Models.Transactions;
-
-    public class SqlDataAccess
+    // ReSharper disable once UnusedMember.Global
+    public class SqlDataAccess : ISqlDataAccess
     {
-        private readonly ISqlUnitOfWork unitOfWork;
-
         public SqlDataAccess(string connectionString) : this(connectionString, null)
         {
         }
@@ -25,17 +22,19 @@
                 throw new ArgumentException($"Connection string is not valid: {connectionString}");
             }
 
-            this.Connection = new SqlConnection(connectionString);
+            Connection = new SqlConnection(connectionString);
 
             if (unitOfWork != null)
             {
-                this.unitOfWork = unitOfWork;
+                UnitOfWork = unitOfWork;
             }
         }
 
         public SqlConnection Connection { get; }
 
-        public List<T> Fill<T>(SqlDataAccessHelper helper)
+        public ISqlUnitOfWork UnitOfWork { get; }
+
+        public IList<T> Fill<T>(SqlDataAccessHelper helper)
         {
             var returnList = new List<T>();
             var accessTimer = new Stopwatch();
@@ -48,7 +47,7 @@
                 {
                     case DataActionRetrievalType.DataSet:
                         accessTimer.Start();
-                        var ds = this.GetDataSet(helper);
+                        var ds = GetDataSet(helper);
                         accessTimer.Stop();
                         helper.ExecutionContext.ExecutionEvent.DataExecutionTiming = accessTimer.ElapsedTicks;
 
@@ -66,7 +65,7 @@
                         break;
                     case DataActionRetrievalType.DataReader:
                         accessTimer.Start();
-                        var dr = this.GetDataReader(helper);
+                        var dr = GetDataReader(helper);
                         accessTimer.Stop();
                         helper.ExecutionContext.ExecutionEvent.DataExecutionTiming = accessTimer.ElapsedTicks;
 
@@ -93,12 +92,12 @@
             }
         }
 
-        public Dictionary<TKey, TObjType> FillToDictionary<TKey, TObjType>(
+        public IDictionary<TKey, TObjType> FillToDictionary<TKey, TObjType>(
             string keyPropertyName,
             SqlDataAccessHelper helper,
             bool overwriteOnDupe = false)
         {
-            var initialReturn = this.Fill<TObjType>(helper);
+            var initialReturn = Fill<TObjType>(helper);
 
             var returnList =
                 SqlMapper.KeyedMap<TKey, TObjType>(keyPropertyName, initialReturn, helper.ExecutionContext, false);
@@ -113,19 +112,19 @@
 
         public T Get<T>(SqlDataAccessHelper helper)
         {
-            var returnList = this.Fill<T>(helper);
+            var returnList = Fill<T>(helper);
 
             return returnList.Count == 0 ? default(T) : returnList[0];
         }
 
         public SqlDataReader GetDataReader(SqlDataAccessHelper helper)
         {
-            var cmd = this.GetCommand(helper);
+            var cmd = GetCommand(helper);
 
-            this.PrepareConnection();
+            PrepareConnection();
 
             return cmd.ExecuteReader(
-                this.unitOfWork != null && this.unitOfWork.CurrentlyOpen
+                UnitOfWork != null && UnitOfWork.CurrentlyOpen
                 ? CommandBehavior.Default
                 : CommandBehavior.CloseConnection);
         }
@@ -133,20 +132,20 @@
         public DataSet GetDataSet(SqlDataAccessHelper helper)
         {
             var ds = new DataSet();
-            var sqlCommand = this.GetCommand(helper);
+            var sqlCommand = GetCommand(helper);
             SqlDataAdapter sqlDa = null;
 
             try
             {
                 sqlDa = new SqlDataAdapter(sqlCommand);
 
-                this.PrepareConnection();
+                PrepareConnection();
 
                 sqlDa.Fill(ds);
             }
             finally
             {
-                this.FinalizeConnection();
+                FinalizeConnection();
 
                 sqlDa?.Dispose();
             }
@@ -160,26 +159,26 @@
 
             returnAccess.AddStatement("SELECT @@SERVERNAME");
 
-            return this.Get<string>(returnAccess);
+            return Get<string>(returnAccess);
         }
 
         private void FinalizeConnection()
         {
-            if (this.Connection.State != ConnectionState.Closed
-                && (this.unitOfWork == null || this.unitOfWork.CurrentlyOpen == false))
+            if (Connection.State != ConnectionState.Closed
+                && (UnitOfWork == null || UnitOfWork.CurrentlyOpen == false))
             {
-                this.Connection.Close();
+                Connection.Close();
             }
         }
 
         private SqlCommand GetCommand(SqlDataAccessHelper helper)
         {
-            var sqlCommand = this.Connection.CreateCommand();
+            var sqlCommand = Connection.CreateCommand();
             sqlCommand.CommandTimeout = helper.ExecutionContext.Timeout;
 
-            if (this.unitOfWork != null && this.unitOfWork.CurrentlyOpen)
+            if (UnitOfWork != null && UnitOfWork.CurrentlyOpen)
             {
-                sqlCommand.Transaction = this.unitOfWork.GetSqlTransaction(this.Connection.ConnectionString);
+                sqlCommand.Transaction = UnitOfWork.GetSqlTransaction(Connection.ConnectionString);
             }
 
             sqlCommand.CommandType = CommandType.Text;
@@ -211,9 +210,9 @@
 
         private void PrepareConnection()
         {
-            if (this.Connection.State == ConnectionState.Closed)
+            if (Connection.State == ConnectionState.Closed)
             {
-                this.Connection.Open();
+                Connection.Open();
             }
         }
     }

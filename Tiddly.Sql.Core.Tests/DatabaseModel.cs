@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tiddly.Sql.Core.Tests
+namespace Tiddly.Sql.Tests
 {
     public class DatabaseModel
     {

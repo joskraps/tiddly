@@ -7,7 +7,7 @@
     using System.Diagnostics;
     using System.Linq;
 
-    using Tiddly.Sql.Models;
+    using Models;
 
     public static class SqlMapper
     {
@@ -16,7 +16,7 @@
 
         public static Dictionary<TKeyType, TObjType> KeyedMap<TKeyType, TObjType>(
             string propertyToKey,
-            List<TObjType> initialReturn,
+            IList<TObjType> initialReturn,
             ExecutionContext executionContext,
             bool overrideKeyOnDupe)
         {

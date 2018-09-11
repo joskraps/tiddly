@@ -7,11 +7,11 @@
     {
         public ExecutionContext()
         {
-            this.TableSchema = "dbo";
-            this.ParameterMappingFunctionCollection = new Dictionary<string, CustomMappingFunction>(StringComparer.OrdinalIgnoreCase);
-            this.CustomColumnMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            this.ParameterMappings = new Dictionary<string, ParameterMapping>(StringComparer.OrdinalIgnoreCase);
-            this.ExecutionEvent = new ExecutionEvent();
+            TableSchema = "dbo";
+            ParameterMappingFunctionCollection = new Dictionary<string, CustomMappingFunction>(StringComparer.OrdinalIgnoreCase);
+            CustomColumnMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            ParameterMappings = new Dictionary<string, ParameterMapping>(StringComparer.OrdinalIgnoreCase);
+            ExecutionEvent = new ExecutionEvent();
         }
 
         public Dictionary<string, CustomMappingFunction> ParameterMappingFunctionCollection { get; }

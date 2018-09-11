@@ -10,14 +10,14 @@
 
         public DataRecordAdapter(IDataRecord row)
         {
-            this.readerRecord = row ?? throw new ArgumentNullException();
+            readerRecord = row ?? throw new ArgumentNullException();
         }
 
         public DataRecordAdapter(DataRow row)
         {
-            this.rowRecord = row ?? throw new ArgumentNullException();
+            rowRecord = row ?? throw new ArgumentNullException();
         }
 
-        public object this[int index] => this.readerRecord != null ? this.readerRecord[index] : this.rowRecord[index];
+        public object this[int index] => readerRecord != null ? readerRecord[index] : rowRecord[index];
     }
 }

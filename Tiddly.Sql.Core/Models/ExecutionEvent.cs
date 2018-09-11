@@ -7,7 +7,7 @@
     {
         public ExecutionEvent()
         {
-            this.ExecutionErrors = new List<Exception>();
+            ExecutionErrors = new List<Exception>();
         }
 
         public long DataExecutionTiming { get; set; }

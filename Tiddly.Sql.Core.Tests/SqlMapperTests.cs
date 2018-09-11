@@ -6,7 +6,7 @@ using Tiddly.Sql.DataAccess;
 using Tiddly.Sql.Mapping;
 using Tiddly.Sql.Models;
 
-namespace Tiddly.Sql.Core.Tests
+namespace Tiddly.Sql.Tests
 {
     [TestClass]
     public class SqlMapperTests
