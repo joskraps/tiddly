@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace Tiddly.Sql.Core.Tests
+namespace Tiddly.Sql.Tests
 {
     public static class ConfigHelper
     {
