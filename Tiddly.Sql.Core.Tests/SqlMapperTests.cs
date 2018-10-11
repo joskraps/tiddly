@@ -176,10 +176,10 @@ namespace Tiddly.Sql.Tests
             }
 
             var ee = new ExecutionContext()
-                         {
-                             CustomColumnMappings = new Dictionary<string, string>(),
-                             TableSchema = "dbo"
-                         };
+            {
+                CustomColumnMappings = new Dictionary<string, string>(),
+                TableSchema = "dbo"
+            };
 
             var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
 
@@ -216,10 +216,10 @@ namespace Tiddly.Sql.Tests
             }
 
             var ee = new ExecutionContext()
-                         {
-                             CustomColumnMappings = new Dictionary<string, string>(),
-                             TableSchema = "dbo"
-                         };
+            {
+                CustomColumnMappings = new Dictionary<string, string>(),
+                TableSchema = "dbo"
+            };
 
             var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
 
@@ -256,10 +256,10 @@ namespace Tiddly.Sql.Tests
             }
 
             var ee = new ExecutionContext()
-                         {
-                             CustomColumnMappings = new Dictionary<string, string>(),
-                             TableSchema = "dbo"
-                         };
+            {
+                CustomColumnMappings = new Dictionary<string, string>(),
+                TableSchema = "dbo"
+            };
 
             var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
 
@@ -297,10 +297,10 @@ namespace Tiddly.Sql.Tests
             }
 
             var ee = new ExecutionContext()
-                         {
-                             CustomColumnMappings = new Dictionary<string, string>(),
-                             TableSchema = "dbo"
-                         };
+            {
+                CustomColumnMappings = new Dictionary<string, string>(),
+                TableSchema = "dbo"
+            };
 
             var testCollection1 = SqlMapper.Map<MappingTestObject>(dt, ee);
 
@@ -357,8 +357,8 @@ namespace Tiddly.Sql.Tests
                     {
                         var initial = int.Parse(x);
 
-                return initial + 1;
-            });
+                        return initial + 1;
+                    });
 
 
             var testO = SqlMapper.MapSingle<MappingTestObject>(dt, helper.ExecutionContext);
@@ -404,6 +404,35 @@ namespace Tiddly.Sql.Tests
             var testHolder = SqlMapper.Map<MappingTestObject>(new DataTable(), new ExecutionContext());
 
             Assert.IsTrue(testHolder.Count == 0);
+        }
+
+        [TestMethod]
+        public void MappingSingleObjectWithExistingObject()
+        {
+            var dt = new DataTable();
+            dt.Columns.AddRange(new[]
+            {
+                new DataColumn("IntegerValue1", typeof(int)),
+                new DataColumn("StringValue1", typeof(string))
+            });
+
+            var dr = dt.NewRow();
+            dr["IntegerValue1"] = 1;
+            dr["StringValue1"] = "BOOM";
+            dt.Rows.Add(dr);
+
+            var nGuid = Guid.NewGuid();
+            var testO = new MappingTestObject() { IntegerValue1= -1, StringValue1 = "MOOB", GuidValue = nGuid };
+
+            SqlMapper.MapSingle<MappingTestObject>(dt, new ExecutionContext()
+            {
+                CustomColumnMappings = new Dictionary<string, string>(),
+                TableSchema = "dbo"
+            }, testO);
+
+            Assert.IsTrue(testO.IntegerValue1 == 1);
+            Assert.IsTrue(testO.StringValue1 == "BOOM");
+            Assert.IsTrue(testO.GuidValue == nGuid);
         }
     }
 

@@ -169,6 +169,49 @@
             return returnO.Count > 0 ? returnO[0] : default(T);
         }
 
+        public static void MapSingle<T>(DataTable dataTable, ExecutionContext context, T localInstance)
+        {
+            var baseType = typeof(T);
+
+            if (!ObjectMappings.ContainsKey(baseType))
+            {
+                GenerateProperties(baseType, context);
+            }
+
+            var columns = Enumerable.Range(0, dataTable.Columns.Count)
+                .Select(i => dataTable.Columns[i].ColumnName).ToList();
+
+            var indexer = GetPropertyIndices(
+                            columns,
+                            ObjectMappings[baseType],
+                            context,
+                            context.TableSchema,
+                            context.CustomColumnMappings);
+
+            foreach (var key in indexer.Keys)
+            {
+                try
+                {
+                    var indexerVal = indexer[key];
+                    var columnName = indexerVal.Name.ToLower();
+                    var tempValue = dataTable.Rows[0][key];
+                    var customMapping = context.ParameterMappingFunctionCollection.ContainsKey(columnName)
+                        ? context.ParameterMappingFunctionCollection[columnName]
+                        : null;
+
+                    SetProperty(
+                        ref localInstance,
+                        indexerVal,
+                        tempValue.ToString(),
+                        customMapping);
+                }
+                catch (Exception ex)
+                {
+                    context.ExecutionEvent.ExecutionErrors.Add(ex);
+                }
+            }
+        }
+
         public static void GenerateProperties(Type objectType, ExecutionContext context)
         {
             var timer = new Stopwatch();
