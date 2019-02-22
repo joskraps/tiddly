@@ -300,6 +300,24 @@
                         Enum.Parse(indexerVal.ObjectPropertyInfo.PropertyType, tempValue),
                         null);
                 }
+                else if (indexerVal.ObjectType == typeof(bool))
+                {
+                    if (tempValue == "0" || tempValue == "1")
+                    {
+                        indexerVal.ObjectPropertyInfo.SetValue(
+                            newO,
+                            Convert.ChangeType(int.Parse(tempValue), indexerVal.ObjectType),
+                            null);
+                    }
+                    else
+                    {
+                        indexerVal.ObjectPropertyInfo.SetValue(
+                            newO,
+                            Convert.ChangeType(tempValue, indexerVal.ObjectType),
+                            null);
+                    }
+
+                }
                 else
                 {
                     indexerVal.ObjectPropertyInfo.SetValue(
