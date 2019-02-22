@@ -74,7 +74,7 @@ namespace Tiddly.Sql.DataAccess
         ///     </see>
         ///     class.class.
         /// </summary>
-        SqlUnitOfWork()
+        public SqlUnitOfWork()
         {
             Connections = new Dictionary<string, IDbConnection>();
         }

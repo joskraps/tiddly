@@ -174,6 +174,26 @@
                 : CommandBehavior.CloseConnection);
         }
 
+        public EnhancedSqlDataReader GetEnhancedDataReader(SqlDataAccessHelper helper)
+        {
+            var cmd = GetCommand(helper);
+
+            PrepareConnection();
+
+            return new EnhancedSqlDataReader(cmd.ExecuteReader(CommandBehavior.CloseConnection));
+        }
+
+        public async Task<EnhancedSqlDataReader> GetEnhancedDataReaderAsync(SqlDataAccessHelper helper)
+        {
+            var cmd = GetCommand(helper);
+
+            PrepareConnection();
+
+            var results = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+
+            return new EnhancedSqlDataReader(results);
+        }
+
         public DataSet GetDataSet(SqlDataAccessHelper helper)
         {
             var ds = new DataSet();
