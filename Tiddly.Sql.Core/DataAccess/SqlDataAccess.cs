@@ -14,6 +14,7 @@
     {
         public SqlDataAccess(string connectionString) : this(connectionString, null)
         {
+            Connection = new SqlConnection(connectionString);
         }
 
         public SqlDataAccess(string connectionString, ISqlUnitOfWork unitOfWork)
@@ -23,11 +24,13 @@
                 throw new ArgumentException($"Connection string is not valid: {connectionString}");
             }
 
-            Connection = new SqlConnection(connectionString);
 
             if (unitOfWork != null)
             {
                 UnitOfWork = unitOfWork;
+
+                Connection = unitOfWork.GetConnection(connectionString) as SqlConnection;
+
             }
         }
 
