@@ -355,7 +355,7 @@ namespace Tiddly.Sql.Tests
                 "IntegerValue1",
                 x =>
                     {
-                        var initial = int.Parse(x);
+                        var initial = int.Parse(x.ToString());
 
                         return initial + 1;
                     });

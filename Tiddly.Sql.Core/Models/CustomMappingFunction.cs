@@ -4,7 +4,7 @@
 
     public class CustomMappingFunction
     {
-        public Func<string, object> Action { get; set; }
+        public Func<object, object> Action { get; set; }
 
         public string TargetProperty { get; set; }
 

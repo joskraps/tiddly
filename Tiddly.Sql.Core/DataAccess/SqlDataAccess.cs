@@ -14,7 +14,7 @@
     {
         public SqlDataAccess(string connectionString) : this(connectionString, null)
         {
-            Connection = new SqlConnection(connectionString);
+            
         }
 
         public SqlDataAccess(string connectionString, ISqlUnitOfWork unitOfWork)
@@ -31,6 +31,10 @@
 
                 Connection = unitOfWork.GetConnection(connectionString) as SqlConnection;
 
+            }
+            else
+            {
+                Connection = new SqlConnection(connectionString);
             }
         }
 

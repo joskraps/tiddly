@@ -13,7 +13,7 @@
         {
             ExecutionContext = new ExecutionContext
             {
-                DataRetrievalType = DataActionRetrievalType.DataReader,
+                DataRetrievalType = DataActionRetrievalType.DataSet,
                 ExecutionEvent = new ExecutionEvent()
             };
         }
@@ -84,7 +84,7 @@
 
         public SqlDataAccessHelper SetPostProcessFunction<T>(
             string targetProperty,
-            Func<string, object> mappingFunction)
+            Func<object, object> mappingFunction)
         {
             targetProperty = targetProperty.ToLower();
 

@@ -280,24 +280,25 @@
         private static void SetProperty<T>(
             ref T newO,
             ObjectPropertyMapping indexerVal,
-            string tempValue,
+            object tempValue,
             CustomMappingFunction customMappingFunction)
         {
             if (customMappingFunction != null)
             {
-                indexerVal.ObjectPropertyInfo.SetValue(newO, customMappingFunction.Action.Invoke(tempValue));
+                var customVal = customMappingFunction.Action.Invoke(tempValue);
+                indexerVal.ObjectPropertyInfo.SetValue(newO, customVal);
             }
             else
             {
                 if (indexerVal.ObjectType == typeof(Guid))
                 {
-                    indexerVal.ObjectPropertyInfo.SetValue(newO, new Guid(tempValue), null);
+                    indexerVal.ObjectPropertyInfo.SetValue(newO, new Guid(tempValue.ToString()), null);
                 }
                 else if (indexerVal.ObjectPropertyInfo.PropertyType.IsEnum)
                 {
                     indexerVal.ObjectPropertyInfo.SetValue(
                         newO,
-                        Enum.Parse(indexerVal.ObjectPropertyInfo.PropertyType, tempValue),
+                        Enum.Parse(indexerVal.ObjectPropertyInfo.PropertyType, tempValue.ToString()),
                         null);
                 }
                 else if (indexerVal.ObjectType == typeof(bool))
@@ -306,7 +307,7 @@
                     {
                         indexerVal.ObjectPropertyInfo.SetValue(
                             newO,
-                            Convert.ChangeType(int.Parse(tempValue), indexerVal.ObjectType),
+                            Convert.ChangeType(int.Parse(tempValue.ToString()), indexerVal.ObjectType),
                             null);
                     }
                     else
@@ -352,7 +353,7 @@
                 SetProperty(
                     ref newO,
                     indexerVal,
-                    tempValue.ToString(),
+                    tempValue,
                     customMapping);
             }
 
