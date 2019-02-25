@@ -721,7 +721,7 @@ namespace Tiddly.Sql.Tests
             helper.AddParameter("master", "master", SqlDbType.VarChar);
             helper.AddParameter("model", "model", SqlDbType.VarChar);
             helper.AddParameter("msdb", "msdb", SqlDbType.VarChar);
-            helper.SetPostProcessFunction<string>("name", s => s == "master" ? "MAPPING FUNCTION" : s);
+            helper.SetPostProcessFunction<string>("name", s => s.ToString() == "master" ? "MAPPING FUNCTION" : s);
 
             var returnValue = da.Get<DatabaseModel>(helper);
             this.OutputTestTimings(helper.ExecutionContext);
@@ -741,7 +741,7 @@ namespace Tiddly.Sql.Tests
             helper.AddParameter("master", "master", SqlDbType.VarChar);
             helper.AddParameter("model", "model", SqlDbType.VarChar);
             helper.AddParameter("msdb", "msdb", SqlDbType.VarChar);
-            helper.SetPostProcessFunction<string>("name", s => s == "master" ? "MAPPING FUNCTION" : s);
+            helper.SetPostProcessFunction<string>("name", s => s.ToString() == "master" ? "MAPPING FUNCTION" : s);
 
             var returnValue = await da.GetAsync<DatabaseModel>(helper);
             this.OutputTestTimings(helper.ExecutionContext);
