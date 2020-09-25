@@ -248,7 +248,7 @@
                         var objectPropertyMapping = new ObjectPropertyMapping
                         {
                             // ReSharper disable once PossibleNullReferenceException
-                            Name = underlyingType.Name,
+                            Name = pi.Name,
                             ObjectType = underlyingType,
                             ObjectPropertyInfo = pi,
                             IsNullable = true
